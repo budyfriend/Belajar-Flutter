@@ -2,9 +2,16 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:first_project/api/post_result_model.dart';
+import 'package:first_project/api/user_list_model.dart';
 import 'package:first_project/api/user_model.dart';
+import 'package:first_project/model/bloc_color.dart';
+import 'package:first_project/model/color_bloc.dart';
+import 'package:first_project/screen/aplication_color.dart';
+import 'package:first_project/screen/cart.dart';
 import 'package:first_project/screen/colorful_button.dart';
 import 'package:first_project/screen/login_page.dart';
+import 'package:first_project/screen/money.dart';
+import 'package:first_project/screen/user_profile.dart';
 import 'package:flutter/material.dart';
 
 // QR Code
@@ -13,17 +20,578 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:qrscan/qrscan.dart' as scanner;
 // Audio Player
 import 'package:audioplayers/audioplayers.dart';
+// Shared Preferences
+import 'package:shared_preferences/shared_preferences.dart';
+// Provider
+import 'package:provider/provider.dart';
+// BloC
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
-  runApp(KoneksiAPIPOST());
+  runApp(LatihanDocComment());
 }
 
-class KoneksiAPIPOST extends StatefulWidget {
+class LatihanDocComment extends StatelessWidget {
+  final UserProfile profile = UserProfile(
+    name: 'Budyfriend',
+    role: 'Programmer',
+    photoURL: null,
+  );
+
   @override
-  _KoneksiAPIPOSTState createState() => _KoneksiAPIPOSTState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: Scaffold(
+      appBar: AppBar(
+        title: Text('Doc Comment Example'),
+        backgroundColor: Colors.red[900],
+      ),
+      body: Center(child: profile),
+    ));
+  }
 }
 
-class _KoneksiAPIPOSTState extends State<KoneksiAPIPOST> {
+class LatihanFlutterBlocDenganLibrary extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: BlocProvider<ColorBlocs>(
+          builder: (context) => ColorBlocs(), child: MainBlocPage()),
+    );
+  }
+}
+
+class MainBlocPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ColorBlocs bloc = BlocProvider.of<ColorBlocs>(context);
+
+    return Scaffold(
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+              backgroundColor: Colors.amber,
+              onPressed: () {
+                bloc.dispatch(ColorEvents.to_amber);
+              }),
+          SizedBox(
+            width: 10,
+          ),
+          FloatingActionButton(
+              backgroundColor: Colors.lightBlue,
+              onPressed: () {
+                bloc.dispatch(ColorEvents.to_light_blue);
+              })
+        ],
+      ),
+      appBar: AppBar(
+        title: Text('BLoC dengan flutter_bloc'),
+      ),
+      body: Center(
+        // ignore: missing_required_param
+        child: BlocBuilder<ColorBlocs, Color>(
+          builder: (context, curentColor) => AnimatedContainer(
+            width: 100,
+            height: 100,
+            color: curentColor,
+            duration: Duration(seconds: 500),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LatihanBLoCStateManagementTanpaLibrary extends StatefulWidget {
+  @override
+  _LatihanBLoCStateManagementTanpaLibraryState createState() =>
+      _LatihanBLoCStateManagementTanpaLibraryState();
+}
+
+class _LatihanBLoCStateManagementTanpaLibraryState
+    extends State<LatihanBLoCStateManagementTanpaLibrary> {
+  ColorBloc bloc = ColorBloc();
+
+  @override
+  void dispose() {
+    bloc.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+                onPressed: () {
+                  bloc.eventSink.add(ColorEvent.to_amber);
+                },
+                backgroundColor: Colors.amber),
+            SizedBox(
+              width: 10,
+            ),
+            FloatingActionButton(
+                onPressed: () {
+                  bloc.eventSink.add(ColorEvent.to_light_blue);
+                },
+                backgroundColor: Colors.lightBlue),
+          ],
+        ),
+        appBar: AppBar(
+          title: Text('BLoC tanpa Library'),
+        ),
+        body: Center(
+          child: StreamBuilder(
+            stream: bloc.stateStream,
+            initialData: Colors.amber,
+            builder: (context, snapshot) {
+              return AnimatedContainer(
+                duration: Duration(seconds: 500),
+                width: 100,
+                height: 100,
+                color: snapshot.data,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LatihanMultiProvider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MultiProvider(
+        providers: [
+          // ignore: missing_required_param
+          ChangeNotifierProvider<Money>(
+            // ignore: deprecated_member_use
+            builder: (context) => Money(),
+          ),
+          // ignore: missing_required_param
+          ChangeNotifierProvider<Cart>(
+            // ignore: deprecated_member_use
+            builder: (context) => Cart(),
+          )
+        ],
+        child: Scaffold(
+          floatingActionButton: Consumer<Money>(
+            builder: (context, money, _) => Consumer<Cart>(
+              builder: (context, cart, _) => FloatingActionButton(
+                onPressed: () {
+                  if (money.balance >= 500) {
+                    cart.quantity += 1;
+                    money.balance -= 500;
+                  }
+                },
+                child: Icon(Icons.add_shopping_cart),
+                backgroundColor: Colors.purple,
+              ),
+            ),
+          ),
+          appBar: AppBar(
+            backgroundColor: Colors.purple,
+            title: Text('Multi Provider'),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Balance'),
+                    Container(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Consumer<Money>(
+                          builder: (context, money, _) => Text(
+                              money.balance.toString(),
+                              style: TextStyle(
+                                  color: Colors.purple,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                      height: 30,
+                      width: 150,
+                      margin: EdgeInsets.all(5),
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: Colors.purple[100],
+                          border: Border.all(color: Colors.purple, width: 2)),
+                    )
+                  ],
+                ),
+                Container(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Consumer<Cart>(
+                      builder: (context, cart, _) => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Apple (500) x ' + cart.quantity.toString(),
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500)),
+                          Text((500 * cart.quantity).toString(),
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  height: 30,
+                  margin: EdgeInsets.all(5),
+                  padding: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(color: Colors.black, width: 2)),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LatihanProviderStateManagement extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      // ignore: missing_required_param
+      home: ChangeNotifierProvider<AplicationColor>(
+        // ignore: deprecated_member_use
+        builder: (context) => AplicationColor(),
+        child: Scaffold(
+          appBar: AppBar(
+              backgroundColor: Colors.black,
+              title: Consumer<AplicationColor>(
+                builder: (context, aplicationColor, _) => Text(
+                  'Provider State Management',
+                  style: TextStyle(
+                    color: aplicationColor.color,
+                  ),
+                ),
+              )),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Consumer<AplicationColor>(
+                  builder: (context, aplicationColor, _) => AnimatedContainer(
+                    margin: EdgeInsets.all(5),
+                    duration: Duration(milliseconds: 500),
+                    width: 100,
+                    height: 100,
+                    color: aplicationColor.color,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(margin: EdgeInsets.all(5), child: Text('AB')),
+                    Consumer<AplicationColor>(
+                        builder: (context, aplicationColor, _) => Switch(
+                            value: aplicationColor.isLightBlue,
+                            onChanged: (newValue) {
+                              aplicationColor.isLightBlue = newValue;
+                            })),
+                    Container(margin: EdgeInsets.all(5), child: Text('LB')),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LatihanSharedPreferences extends StatefulWidget {
+  @override
+  _LatihanSharedPreferencesState createState() =>
+      _LatihanSharedPreferencesState();
+}
+
+class _LatihanSharedPreferencesState extends State<LatihanSharedPreferences> {
+  TextEditingController txtControler = TextEditingController(text: 'No Name');
+  bool isON = false;
+
+  void saveData() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString("nama", txtControler.text);
+    pref.setBool("ison", isON);
+  }
+
+  Future<String> getNama() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.getString("nama") ?? "No Name";
+  }
+
+  Future<bool> getON() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.getBool("ison") ?? false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Shared Preference Example'),
+        ),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            TextField(
+              controller: txtControler,
+            ),
+            Switch(
+                value: isON,
+                onChanged: (newValue) {
+                  setState(() {
+                    isON = newValue;
+                  });
+                }),
+            RaisedButton(
+              onPressed: () {
+                saveData();
+              },
+              child: Text('Save'),
+            ),
+            RaisedButton(
+              onPressed: () {
+                getNama().then((s) {
+                  txtControler.text = s;
+                  setState(() {});
+                });
+                getON().then((b) {
+                  isON = b;
+                  setState(() {});
+                });
+              },
+              child: Text('Load'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LatihanAnimatedPadding extends StatefulWidget {
+  @override
+  _LatihanAnimatedPaddingState createState() => _LatihanAnimatedPaddingState();
+}
+
+class _LatihanAnimatedPaddingState extends State<LatihanAnimatedPadding> {
+  double myPadding = 5;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Animated Padding'),
+        ),
+        body: Column(
+          children: [
+            Flexible(
+              flex: 1,
+              child: Row(
+                children: [
+                  Flexible(
+                      flex: 1,
+                      child: AnimatedPadding(
+                          duration: Duration(seconds: 1),
+                          padding: EdgeInsets.all(myPadding),
+                          child: Container(color: Colors.red))),
+                  Flexible(
+                      flex: 1,
+                      child: AnimatedPadding(
+                          duration: Duration(seconds: 1),
+                          padding: EdgeInsets.all(myPadding),
+                          child: Container(color: Colors.green)))
+                ],
+              ),
+            ),
+            Flexible(
+              flex: 1,
+              child: Row(
+                children: [
+                  Flexible(
+                      flex: 1,
+                      child: AnimatedPadding(
+                          duration: Duration(seconds: 1),
+                          padding: EdgeInsets.all(myPadding),
+                          child: Container(color: Colors.blue))),
+                  Flexible(
+                      flex: 1,
+                      child: AnimatedPadding(
+                          duration: Duration(seconds: 1),
+                          padding: EdgeInsets.all(myPadding),
+                          child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  myPadding = 20;
+                                });
+                              },
+                              child: Container(color: Colors.yellow))))
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LathianAnimatedShitcher extends StatefulWidget {
+  @override
+  _LathianAnimatedShitcherState createState() =>
+      _LathianAnimatedShitcherState();
+}
+
+class _LathianAnimatedShitcherState extends State<LathianAnimatedShitcher> {
+  bool isON = false;
+  Widget myWidget = Container(
+      width: 200,
+      height: 100,
+      decoration: BoxDecoration(
+        color: Colors.red,
+        border: Border.all(color: Colors.black, width: 3),
+      ));
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Animated Switcher'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              AnimatedSwitcher(
+                duration: Duration(seconds: 1),
+                transitionBuilder: (child, animation) => RotationTransition(
+                  turns: animation,
+                  child: child,
+                ),
+
+                // ScaleTransition(
+                //   scale: animation,
+                //   child: child,
+                // ),
+                child: myWidget,
+              ),
+              Switch(
+                  activeColor: Colors.green,
+                  inactiveThumbColor: Colors.red,
+                  inactiveTrackColor: Colors.red[200],
+                  value: isON,
+                  onChanged: (newValue) {
+                    isON = newValue;
+                    setState(() {
+                      if (isON)
+                        myWidget = Container(
+                            // jika menggunakan widget sama maka gunakan key pada container
+                            key: ValueKey(1),
+                            width: 200,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              border: Border.all(color: Colors.black, width: 3),
+                            ));
+                      // SizedBox(
+                      //   width: 200,
+                      //   height: 100,
+                      //   child: Center(
+                      //     child: Text(
+                      //       'Switch : ON',
+                      //       style: TextStyle(
+                      //           color: Colors.green,
+                      //           fontWeight: FontWeight.w700,
+                      //           fontSize: 20),
+                      //     ),
+                      //   ),
+                      // );
+                      else
+                        myWidget = Container(
+                            key: ValueKey(2),
+                            width: 200,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              border: Border.all(color: Colors.black, width: 3),
+                            ));
+                    });
+                  })
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class KoneksiAPIList extends StatefulWidget {
+  @override
+  _KoneksiAPIListState createState() => _KoneksiAPIListState();
+}
+
+class _KoneksiAPIListState extends State<KoneksiAPIList> {
+  String output = 'no data';
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Demo API List'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text(output),
+              RaisedButton(
+                onPressed: () {
+                  UserList.getListUser("2").then((users) {
+                    output = '';
+                    for (int i = 0; i < users.length; i++) {
+                      output += '[ ' + users[i].name + ' ] ';
+                      setState(() {});
+                    }
+                  });
+                },
+                child: Text('GET'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class KoneksiAPI extends StatefulWidget {
+  @override
+  _KoneksiAPIState createState() => _KoneksiAPIState();
+}
+
+class _KoneksiAPIState extends State<KoneksiAPI> {
   PostResult postResult = null;
   User user = null;
 

@@ -25,9 +25,12 @@ dependencies:
     sdk: flutter
   audioplayers: ^0.16.2
   cupertino_icons: ^1.0.0
+  http: ^0.12.2
+  provider: ^3.0.0+1
   qr_flutter: ^3.2.0
   qrscan: ^0.2.16
-  http: ^0.12.2
+  shared_preferences: ^0.5.12+4
+  flutter_bloc: ^0.20.1
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +50,7 @@ flutter:
   assets:
     - images/landing-build-products.jpg
     - images/patern.png
+    - images/budyfriend.png
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
