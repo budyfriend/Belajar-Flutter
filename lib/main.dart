@@ -1,4 +1,5 @@
 // Timer
+// Dipodik
 import 'dart:async';
 
 import 'dart:math';
@@ -32,7 +33,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
-  runApp(LatihanCustomProgressBar());
+  runApp(LatihanProductCard());
 }
 
 class LatihanProductCard extends StatelessWidget {
@@ -44,21 +45,44 @@ class LatihanProductCard extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: firstColor,
         ),
-        body: Container(
-          margin: EdgeInsets.all(20),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ProductCard(
-              imageURL:
-                  'https://jubi.co.id/wp-content/uploads/2020/06/Buah-jeruk-Tempo.co_.jpg',
-              name: 'Buah Jeruk 1 Kg',
-              price: 'Rp10.000,-',
-              onAddCartTap: () {},
+        body: ChangeNotifierProvider<ProductState>(
+          builder: (context) => ProductState(),
+          child: Container(
+            margin: EdgeInsets.all(20),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Consumer<ProductState>(
+                builder: (context, productState, _) => ProductCard(
+                  imageURL:
+                      'https://jubi.co.id/wp-content/uploads/2020/06/Buah-jeruk-Tempo.co_.jpg',
+                  name: 'Buah Jeruk 1 Kg',
+                  price: 'Rp10.000,-',
+                  quantity: productState.quantity,
+                  notification:
+                      (productState.quantity > 5) ? "Diskon 10%" : null,
+                  onAddCartTap: () {},
+                  onIncTap: () {
+                    productState.quantity++;
+                  },
+                  onDecTap: () {
+                    productState.quantity--;
+                  },
+                ),
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class ProductState with ChangeNotifier {
+  int _quantity = 0;
+  int get quantity => _quantity;
+  set quantity(int newValue) {
+    _quantity = newValue;
+    notifyListeners();
   }
 }
 

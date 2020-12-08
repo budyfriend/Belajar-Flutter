@@ -7,7 +7,11 @@ class ProductCard extends StatelessWidget {
   final String imageURL;
   final String name;
   final String price;
+  final int quantity;
+  final String notification;
   final Function onAddCartTap;
+  final Function onIncTap;
+  final Function onDecTap;
 
   final TextStyle textStyle = TextStyle(
       fontFamily: 'Lato',
@@ -15,14 +19,48 @@ class ProductCard extends StatelessWidget {
       fontWeight: FontWeight.bold,
       color: Colors.grey[800]);
 
-  ProductCard(
-      {this.imageURL = '', this.name = '', this.price = '', this.onAddCartTap});
+  ProductCard({
+    this.imageURL = '',
+    this.name = '',
+    this.price = '',
+    this.quantity = 0,
+    this.notification,
+    this.onAddCartTap,
+    this.onIncTap,
+    this.onDecTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         // notifikasi
+        AnimatedContainer(
+          padding: EdgeInsets.all(5),
+          margin: EdgeInsets.only(left: 10, right: 10),
+          duration: Duration(milliseconds: 300),
+          width: 130,
+          height: (notification != null) ? 270 : 250,
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                  blurRadius: 3,
+                  offset: Offset(1, 1),
+                  color: Colors.black.withOpacity(0.3))
+            ],
+            borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(8),
+                bottomRight: Radius.circular(8)),
+            color: secondColor,
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Text(
+              (notification != null) ? notification : "",
+              style: textStyle.copyWith(color: Colors.white, fontSize: 12),
+            ),
+          ),
+        ),
         Container(
           width: 150,
           height: 250,
@@ -72,6 +110,46 @@ class ProductCard extends StatelessWidget {
                 Column(
                   children: [
                     //tombol + -
+                    Container(
+                      width: 140,
+                      height: 30,
+                      decoration:
+                          BoxDecoration(border: Border.all(color: firstColor)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: onIncTap,
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              color: firstColor,
+                              // Jika icon ingin bisa di klik di bungkus dengan GesturDetector
+                              child: Icon(
+                                Icons.add,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Text(quantity.toString(), style: textStyle),
+                          GestureDetector(
+                            onTap: onDecTap,
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              color: firstColor,
+                              // Jika icon ingin bisa di klik di bungkus dengan GesturDetector
+                              child: Icon(
+                                Icons.remove,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                     SizedBox(
                         width: 140,
                         child: RaisedButton(
