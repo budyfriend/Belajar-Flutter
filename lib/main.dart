@@ -32,8 +32,133 @@ import 'package:provider/provider.dart';
 // BloC
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'model/color_bloc2.dart';
+
 void main() {
-  runApp(LatihanProductCard());
+  runApp(LatihanFlutterBlocDenganLibrary2());
+}
+
+class LatihanFlutterBlocDenganLibrary2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: BlocProvider<ColorBloc2>(
+          builder: (context) => ColorBloc2(), child: MainBlocPage2()),
+    );
+  }
+}
+
+class MainBlocPage2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ColorBloc2 bloc = BlocProvider.of<ColorBloc2>(context);
+
+    return Scaffold(
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+              backgroundColor: Colors.amber,
+              onPressed: () {
+                bloc.dispatch(ColorEvents2.to_amber);
+              }),
+          SizedBox(
+            width: 10,
+          ),
+          FloatingActionButton(
+              backgroundColor: Colors.lightBlue,
+              onPressed: () {
+                bloc.dispatch(ColorEvents2.to_light_blue);
+              })
+        ],
+      ),
+      appBar: AppBar(
+        title: Text('BLoC dengan flutter_bloc'),
+      ),
+      body: Center(
+        // ignore: missing_required_param
+        child: BlocBuilder<ColorBloc2, Color>(
+          builder: (context, curentColor) => AnimatedContainer(
+            width: 100,
+            height: 100,
+            color: curentColor,
+            duration: Duration(milliseconds: 500),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LatihanSelectableTextTogleColorFilter extends StatefulWidget {
+  @override
+  _LatihanSelectableTextTogleColorFilterState createState() =>
+      _LatihanSelectableTextTogleColorFilterState();
+}
+
+class _LatihanSelectableTextTogleColorFilterState
+    extends State<LatihanSelectableTextTogleColorFilter> {
+  List<bool> isSelected = [true, false, false];
+  ColorFilter colorFilter = ColorFilter.mode(Colors.blue, BlendMode.screen);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: ColorFiltered(
+        colorFilter: colorFilter,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Demo Widget'),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SelectableText(
+                  'Ini adalah selectable text, Silahkan pilih saya.',
+                  style: TextStyle(fontSize: 20),
+                  showCursor: true,
+                  cursorWidth: 3,
+                  cursorColor: Colors.red,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                ToggleButtons(
+                    children: [
+                      Icon(Icons.access_alarm),
+                      Icon(Icons.adb),
+                      Icon(Icons.add_comment)
+                    ],
+                    isSelected: isSelected,
+                    onPressed: (index) {
+                      setState(() {
+                        if (index == 0)
+                          colorFilter =
+                              ColorFilter.mode(Colors.blue, BlendMode.screen);
+                        else if (index == 1)
+                          colorFilter = ColorFilter.mode(
+                              Colors.green, BlendMode.softLight);
+                        else
+                          colorFilter = ColorFilter.mode(
+                              Colors.purple, BlendMode.multiply);
+                        for (int i = 0; i < isSelected.length; i++)
+                          isSelected[i] = (i == index) ? true : false;
+                      });
+                    },
+                    fillColor: Colors.red[50],
+                    selectedColor: Colors.red,
+                    selectedBorderColor: Colors.red,
+                    splashColor: Colors.blue,
+                    highlightColor: Colors.yellow,
+                    borderRadius: BorderRadius.circular(15))
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class LatihanProductCard extends StatelessWidget {
@@ -45,7 +170,9 @@ class LatihanProductCard extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: firstColor,
         ),
+        // ignore: missing_required_param
         body: ChangeNotifierProvider<ProductState>(
+          // ignore: deprecated_member_use
           builder: (context) => ProductState(),
           child: Container(
             margin: EdgeInsets.all(20),
@@ -345,7 +472,7 @@ class MainBlocPage extends StatelessWidget {
             width: 100,
             height: 100,
             color: curentColor,
-            duration: Duration(seconds: 500),
+            duration: Duration(milliseconds: 500),
           ),
         ),
       ),
@@ -400,7 +527,7 @@ class _LatihanBLoCStateManagementTanpaLibraryState
             initialData: Colors.amber,
             builder: (context, snapshot) {
               return AnimatedContainer(
-                duration: Duration(seconds: 500),
+                duration: Duration(milliseconds: 500),
                 width: 100,
                 height: 100,
                 color: snapshot.data,
