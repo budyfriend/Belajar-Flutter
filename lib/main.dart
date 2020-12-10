@@ -10,6 +10,7 @@ import 'package:first_project/api/user_list_model.dart';
 import 'package:first_project/api/user_model.dart';
 import 'package:first_project/model/bloc_color.dart';
 import 'package:first_project/model/color_bloc.dart';
+import 'package:first_project/model/color_bloc2.dart';
 import 'package:first_project/screen/aplication_color.dart';
 import 'package:first_project/screen/cart.dart';
 import 'package:first_project/screen/colorful_button.dart';
@@ -29,13 +30,111 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // Provider
 import 'package:provider/provider.dart';
-// BloC
+// BloC & Hydrated
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'model/color_bloc2.dart';
+import 'package:bloc/bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 void main() {
-  runApp(LatihanFlutterBlocDenganLibrary2());
+  runApp(LatihanListViewBulderandBLoC());
+}
+
+// Untuk Hydrated
+// void main() async {
+//   BlocSupervisor.delegate = await HydratedBlocDelegate.build();
+//   runApp(LatihanFlutterBlocDenganLibrary2());
+// }
+
+class LatihanListViewBulderandBLoC extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: BlocProvider(
+          builder: (context) => ProductBloc(), child: MainPageListViewBLoC()),
+    );
+  }
+}
+
+class MainPageListViewBLoC extends StatelessWidget {
+  final Random r = Random();
+
+  @override
+  Widget build(BuildContext context) {
+    ProductBloc bloc = BlocProvider.of<ProductBloc>(context);
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(0xffF44336),
+        title: Text('Demo ListView Builder'),
+      ),
+      body: Column(
+        children: [
+          RaisedButton(
+            textColor: Colors.white,
+            color: Color(0xffF44336),
+            child: Text('Create Products'),
+            onPressed: () {
+              bloc.dispatch(r.nextInt(4) + 2);
+            },
+          ),
+          BlocBuilder<ProductBloc, List<Product>>(
+            builder: (context, products) => Expanded(
+              child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        (index == 0)
+                            ? SizedBox(
+                                width: 20,
+                              )
+                            : Container(),
+                        ProductCard(
+                          imageURL: products[index].imageURL,
+                          name: products[index].name,
+                          price: products[index].price.toString(),
+                          onAddCartTap: () {},
+                          onIncTap: () {},
+                          onDecTap: () {},
+                        ),
+                        SizedBox(
+                          width: 20,
+                        )
+                      ],
+                    );
+                  }),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class Product {
+  String imageURL;
+  String name;
+  int price;
+  Product({this.imageURL = "", this.name = "", this.price = 0});
+}
+
+class ProductBloc extends Bloc<int, List<Product>> {
+  @override
+  List<Product> get initialState => [];
+
+  @override
+  Stream<List<Product>> mapEventToState(int event) async* {
+    List<Product> products = [];
+    for (int i = 0; i < event; i++)
+      products.add(Product(
+          imageURL:
+              "https://jubi.co.id/wp-content/uploads/2020/06/Buah-jeruk-Tempo.co_.jpg",
+          name: "Product " + i.toString(),
+          price: (i + 1) * 5000));
+    yield products;
+  }
 }
 
 class LatihanFlutterBlocDenganLibrary2 extends StatelessWidget {
@@ -73,7 +172,7 @@ class MainBlocPage2 extends StatelessWidget {
         ],
       ),
       appBar: AppBar(
-        title: Text('BLoC dengan flutter_bloc'),
+        title: Text('BLoC Hydrated'),
       ),
       body: Center(
         // ignore: missing_required_param
@@ -222,6 +321,7 @@ class LatihanCustomProgressBar extends StatelessWidget {
           title: Text('Custom Progress Bar'),
         ),
         body: Center(
+          // ignore: missing_required_param
           child: ChangeNotifierProvider<TimeState>(
             // ignore: deprecated_member_use
             builder: (context) => TimeState(),
@@ -969,7 +1069,9 @@ class KoneksiAPI extends StatefulWidget {
 }
 
 class _KoneksiAPIState extends State<KoneksiAPI> {
+  // ignore: avoid_init_to_null
   PostResult postResult = null;
+  // ignore: avoid_init_to_null
   User user = null;
 
   @override
