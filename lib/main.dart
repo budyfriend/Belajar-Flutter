@@ -8,6 +8,8 @@ import 'dart:ui';
 import 'package:first_project/api/post_result_model.dart';
 import 'package:first_project/api/user_list_model.dart';
 import 'package:first_project/api/user_model.dart';
+import 'package:first_project/bloc/colors_bloc.dart';
+import 'package:first_project/bloc/counter_bloc.dart';
 import 'package:first_project/model/bloc_color.dart';
 import 'package:first_project/model/color_bloc.dart';
 import 'package:first_project/model/color_bloc2.dart';
@@ -18,6 +20,7 @@ import 'package:first_project/screen/login_page.dart';
 import 'package:first_project/screen/money.dart';
 import 'package:first_project/screen/product_card.dart';
 import 'package:first_project/screen/user_profile.dart';
+import 'package:first_project/ui/main_page.dart';
 import 'package:flutter/material.dart';
 
 // QR Code
@@ -35,15 +38,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc/bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-void main() {
-  runApp(LatihanListViewBulderandBLoC());
-}
-
 // Untuk Hydrated
 // void main() async {
 //   BlocSupervisor.delegate = await HydratedBlocDelegate.build();
 //   runApp(LatihanFlutterBlocDenganLibrary2());
 // }
+
+void main() {
+  runApp(LatihanMultiBLoCMultiPageApp());
+}
+
+class LatihanMultiBLoCMultiPageApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ColorsBloc>(builder: (context) => ColorsBloc()),
+        BlocProvider<CounterBloc>(builder: (context) => CounterBloc()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: MainPages(),
+      ),
+    );
+  }
+}
 
 class LatihanListViewBulderandBLoC extends StatelessWidget {
   @override
